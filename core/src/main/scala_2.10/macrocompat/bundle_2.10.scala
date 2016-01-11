@@ -98,7 +98,7 @@ class BundleMacro[C <: Context](val c: C) {
       }
     })
 
-    val compatCtx = q""" new _root_.macrocompat.CompatContext[$ctxNme.type]($ctxNme) """
+    val compatCtx = q"""(new _root_.macrocompat.RuntimeCompatContext[_root_.scala.reflect.macros.runtime.Context]($ctxNme.asInstanceOf[_root_.scala.reflect.macros.runtime.Context])).asInstanceOf[_root_.macrocompat.CompatContext[$ctxNme.type]]"""
 
     val call = q""" $instNme($compatCtx).${name.toTermName}[..$targs](...$cargss) """
     val (ctpt, crhs) =
@@ -113,7 +113,10 @@ class BundleMacro[C <: Context](val c: C) {
          )
       }
 
-    DefDef(mods, name, tparams, List(ctxParam) :: cvparamss, ctpt, crhs)
+    val res = DefDef(mods, name, tparams, List(ctxParam) :: cvparamss, ctpt, crhs)
+    println("in: "++show(d))
+    println("out: "++show(res))
+    res
   }
 
   object MacroImpl {
